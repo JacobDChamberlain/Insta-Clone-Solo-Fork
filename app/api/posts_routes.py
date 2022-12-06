@@ -42,7 +42,6 @@ def all_posts():
 @posts_routes.route("/", methods=["POST"])
 @login_required
 def upload_image():
-    print("test")
     if "image" not in request.files:
         return {"errors": "image required"}, 400
 
@@ -62,8 +61,12 @@ def upload_image():
         return upload, 400
 
     url = upload["url"]
+
+    form = PostForm()
+    form['csrf_token'].data = request.cookies['csrf_token']
+
     # flask_login allows us to get the current user from the request
-    new_image = Post(user=current_user, url=url)
+    new_image = Post(user=current_user, url=url, caption=form.data['caption'])
     db.session.add(new_image)
     db.session.commit()
     return {"url": url}
